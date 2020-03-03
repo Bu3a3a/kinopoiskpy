@@ -203,7 +203,12 @@ class MovieMainPage(KinopoiskPage):
         'plot': './/div[@itemprop="description"]/text()',
         'rating': './/span[@class="rating_ball"]/text()',
         'votes': './/div[@id="block_rating"]//div[@class="div1"]//span[@class="ratingCount"]/text()',
-        'imdb': './/div[@id="block_rating"]//div[@class="block_2"]//div[last()]/text()',
+        'imdb': './/div[@id="block_rating"]//div[@class="block_2"]//div/text()',
+        'min_age': 'substring-after('
+                   './/div[@id="infoTable"]//tr[@class="ratePopup"]/td/div[contains(@class, "age")]/@class, '
+                   '"ageLimit age"'
+                   ')',
+        'main_poster': './/a[@class="popupBigImage"]/img[@itemprop="image"]/@src'
     }
 
     def parse(self):
@@ -257,8 +262,10 @@ class MovieMainPage(KinopoiskPage):
         self.instance.plot = self.extract('plot', to_str=True)
         self.instance.rating = self.extract('rating', to_float=True)
         self.instance.votes = self.extract('votes', to_int=True)
+        self.instance.min_age = self.extract('min_age', to_int=True)
+        self.instance.main_poster = self.extract('main_poster', to_str=True)
 
-        imdb = re.findall(r'^IMDb: ([0-9\.]+) \(([0-9 ]+)\)$', self.extract('imdb'))
+        imdb = re.findall(r'IMDb: ([0-9\.]+) \(([0-9 ]+)\)', self.extract('imdb'))
         if imdb:
             self.instance.imdb_rating = float(imdb[0][0])
             self.instance.imdb_votes = self.prepare_int(imdb[0][1])
@@ -324,7 +331,10 @@ class MovieRoleLink(KinopoiskPage):
                 self.instance.voice = True
 
         self.instance.name = role_name
-        self.instance.person = Person.get_parsed('cast_link', self.content)
+
+        person = Person.get_parsed('cast_link', self.content)
+        self.instance.person = person
+        self.instance.id = person.id
 
         self.instance.set_source('role_link')
 

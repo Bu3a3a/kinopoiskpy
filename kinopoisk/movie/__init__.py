@@ -18,6 +18,8 @@ class Movie(KinopoiskObject):
         self.title = ''
         self.title_en = ''
         self.plot = ''
+        self.min_age = None
+        self.main_poster = ''
 
         self.year = None
         self.countries = []
@@ -86,6 +88,7 @@ class Role(KinopoiskObject):
     Movie Role Class
     """
     def set_defaults(self):
+        self.id = None
         self.name = ''
         self.person = None
         self.voice = False
